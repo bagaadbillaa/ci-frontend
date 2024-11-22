@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diabetes Prediction</title>
+  <style>
+     body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .form-row select,
+    .form-row input {
+      width: 100%;
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-row select:focus,
+    .form-row input:focus {
+      border-color: #3498db;
+      background-color: #fff;
+    }
+
+    button {
+      padding: 12px;
+      font-size: 1.2em;
+      color: #fff;
+      background-color: #e74c3c;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #c0392b;
+    }
+
+    .result {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.5em;
+    }
+    .form-row input {
+      width: 100%; 
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box; 
+  }
+  .form-row div {
+      flex: 1; 
+  }
+  .form-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+  }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Diabetes Prediction</h1>
+    <form id="prediction-form">
+      <div class="form-row">
+        <div>
+          <label for="Pregnancies">Pregnancies:</label>
+          <input type="number" id="Pregnancies" required>
+        </div>
+        <div>
+          <label for="Glucose">Glucose:</label>
+          <input type="number" id="Glucose" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="BloodPressure">Blood Pressure:</label>
+          <input type="number" id="BloodPressure" required>
+        </div>
+        <div>
+          <label for="SkinThickness">Skin Thickness:</label>
+          <input type="number" id="SkinThickness" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="Insulin">Insulin:</label>
+          <input type="number" id="Insulin" required>
+        </div>
+        <div>
+          <label for="BMI">BMI:</label>
+          <input type="number" id="BMI" step="any" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="DPF">Diabetes Pedigree Function (DPF):</label>
+          <input type="number" id="DPF" step="any" required>
+        </div>
+        <div>
+          <label for="Age">Age:</label>
+          <input type="number" id="Age" required>
+        </div>
+      </div>
+
+      <button type="submit">Predict</button>
+    </form>
+
+    <div id="result" class="result-container"></div>
+  </div>
+
+  <script>
+    const API_BASE_URL = "https://diabetesprediction-flask-app.onrender.com";
+
+    document.getElementById('prediction-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const features = {};
+        const featureIds = [
+          'Pregnancies', 'Glucose', 'BloodPressure',
+          'SkinThickness', 'Insulin', 'BMI', 'DPF', 'Age'
+        ];
+
+        featureIds.forEach(id => {
+            const featureValue = parseFloat(document.getElementById(id).value);
+            features[id] = featureValue;
+        });
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(features)
+            });
+
+            const data = await response.json();
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.classList.remove('success', 'failure');
+
+
+            if (data.prediction === 'Diabetes detected') {
+                resultDiv.textContent = '🔴 Diabetes Detected! 🔴';
+                resultDiv.classList.add('failure');
+            } else {
+                resultDiv.textContent = '✅ No Diabetes Detected! ✅';
+                resultDiv.classList.add('success');
+            }
+        } catch (error) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = 'Oops! Something went wrong... 😞';
+            resultDiv.classList.remove('success', 'failure');
+        }
+    });
+  </script>
+</body>
+</html>
